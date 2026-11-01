@@ -112,6 +112,7 @@ thai-egp doesn't collect directors automatically. DBD doesn't offer that: the si
 - Only contracts in e-GP, from fiscal year 2558 to the latest year on data.go.th. New years are found by dataset title.
 - One company can be spelled several ways (`บจก.`, `บริษัท ... จำกัด`, with or without `(มหาชน)`). `winners` merges them; `--winner` is a substring match, so try variants.
 - Renamed companies are counted separately.
+- Some projects list the same contract twice, same winner and amount but a new contract number (probably a re-signed contract), so they sum above the budget. Measured on a sample, that moves totals by about 0.01%, and by no more than 0.05% for the largest winners. thai-egp counts what the data says.
 - The numbers are what agencies typed in. Typos in, typos out.
 
 ## Data source and licence
