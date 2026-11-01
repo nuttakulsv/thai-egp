@@ -66,6 +66,13 @@ def test_winner_ids():
     assert t.name_key("บริษัท ทดสอบ จำกัด (มหาชน)") == t.name_key("บริษัท ทดสอบ จำกัด")
 
 
+def test_safe_name():
+    assert t.safe_name("2568-egp-contract-1") == "2568-egp-contract-1"
+    for evil in ("../../etc/passwd", "..\\..\\x", "a/b/c", "/abs", ".."):
+        n = t.safe_name(evil)
+        assert "/" not in n and "\\" not in n and not n.startswith(".") and n
+
+
 def write_csv(path, rows):
     with open(path, "w", newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f)

@@ -176,8 +176,14 @@ def dataset(year):
     raise SystemExit(f"egp: no e-GP contract dataset for fiscal year {year} on data.go.th yet")
 
 
+def safe_name(s):
+    """A resource name from data.go.th as a plain file name: no folders, no leading dots."""
+    s = re.sub(r"[^\w.-]", "_", s.replace("\\", "/").rsplit("/", 1)[-1]).lstrip(".")
+    return s or "file"
+
+
 def parts(year):
-    return [(r["name"].removesuffix(".csv") + ".csv", r["url"], r.get("size"))
+    return [(safe_name(r["name"].removesuffix(".csv")) + ".csv", r["url"], r.get("size"))
             for r in dataset(year)["resources"] if (r.get("format") or "").upper() == "CSV"]
 
 
