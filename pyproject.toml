@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "thai-egp"
+version = "0.1.0"
+description = "Thai government procurement (e-GP) open data: download, clean, load into SQLite, search, red flags"
+readme = "README.en.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+keywords = ["thailand", "procurement", "e-gp", "open-data", "data.go.th", "govspending"]
+
+[project.scripts]
+egp = "thai_egp:main"
+
+[project.urls]
+Homepage = "https://github.com/nuttakulsv/thai-egp"
+
+[tool.setuptools]
+py-modules = ["thai_egp"]

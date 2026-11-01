@@ -1,0 +1,9 @@
+*.sqlite
+*.sqlite-journal
+egp-data/
+egp-cache/
+winners*.csv
+winners*-summary.json
+__pycache__/
+*.egg-info/
+build/
