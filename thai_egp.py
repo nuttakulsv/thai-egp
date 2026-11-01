@@ -720,5 +720,7 @@ def main(argv=None):
 if __name__ == "__main__":
     try:
         main()
+        sys.stdout.flush()
     except (BrokenPipeError, KeyboardInterrupt):
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())  # output piped to head: stop quietly
         sys.exit(1)
