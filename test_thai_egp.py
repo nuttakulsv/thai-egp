@@ -60,6 +60,8 @@ def test_winner_ids():
     assert r["winner_juristic"] == 0  # 13 digits not starting with 0: a person
     r = t.clean(row(t.WIDE, winner_id="352050022xxxx", winner_name="นายทดสอบ ระบบ"))
     assert r["winner_juristic"] == 0 and r["winner_id"] == "352050022xxxx"
+    r = t.clean(row(t.WIDE, winner_id="1.06E+11"))  # narrow Excel column: 105555... rounded to 3 digits
+    assert r["winner_juristic"] == 1 and r["winner_prefix"] is None
     r = t.clean(row(t.WIDE, winner_id="", winner_name="หจก.ทดสอบการค้า"))
     assert r["winner_juristic"] == 1 and r["winner_prefix"] is None
     assert t.name_key("บริษัท ทดสอบ ก่อสร้าง จำกัด") == t.name_key("บจก.ทดสอบก่อสร้าง")
@@ -98,6 +100,20 @@ def test_winners_merge_across_years():
         assert r["dbd"].endswith("/5/0105555012345")
         assert odd and odd[0][0] == "7"
         assert Y["2567"]["specific"][0] == 6  # year totals include everyone, typos too
+
+
+def test_winners_merge_rounded_and_mistyped_ids():
+    def e(n):
+        return dict(n=n, baht=n * 1000, spec_n=n, spec_baht=n * 1000, agree_n=0, agree_baht=0,
+                    y0=2560, y1=2568, ids={}, names={"บริษัท ทดสอบ จำกัด": n}, depts={})
+    part = dict(bad=0, odd=[], years={}, winners={
+        "ทดสอบ|10555": e(100),  # the real company
+        "ทดสอบ|10600": e(10),   # '1.06E+11' read before the fix: entity digit 6 does not exist
+        "ทดสอบ|?????": e(5),    # no ID
+        "ทดสอบ|10222": e(1),    # an agency typed someone else's number
+    })
+    W = t.merge([part])[0]
+    assert W["ทดสอบ|10555"]["n"] == 115 and set(W) == {"ทดสอบ|10555", "ทดสอบ|10222"}, W.keys()
 
 
 def test_load_and_flags():

@@ -233,19 +233,28 @@ def download(year, folder):
     os.makedirs(folder, exist_ok=True)
     for name, url, size in parts(year):
         path = os.path.join(folder, name)
-        have = os.path.getsize(path) if os.path.exists(path) else 0
-        if size and have == size:
-            print(f"{name}: done", file=sys.stderr)
-            continue
-        req = urllib.request.Request(url, headers={**UA, "Range": f"bytes={have}-"} if have else UA)
-        with urllib.request.urlopen(req, timeout=120) as r, open(path, "ab" if r.status == 206 else "wb") as f:
-            got = have if r.status == 206 else 0
-            while chunk := r.read(1 << 20):
-                f.write(chunk)
-                got += len(chunk)
-                if size:
-                    print(f"\r{name}: {got * 100 // size}%", end="", file=sys.stderr)
-        print(f"\r{name}: {got // 1_000_000} MB", file=sys.stderr)
+        for attempt in range(10):  # data.go.th stalls now and then; pick up where it stopped
+            have = os.path.getsize(path) if os.path.exists(path) else 0
+            if size and have == size:
+                print(f"{name}: done", file=sys.stderr)
+                break
+            req = urllib.request.Request(url, headers={**UA, "Range": f"bytes={have}-"} if have else UA)
+            try:
+                with urllib.request.urlopen(req, timeout=120) as r, open(path, "ab" if r.status == 206 else "wb") as f:
+                    got = have if r.status == 206 else 0
+                    while chunk := r.read(1 << 20):
+                        f.write(chunk)
+                        got += len(chunk)
+                        if size:
+                            print(f"\r{name}: {got * 100 // size}%", end="", file=sys.stderr)
+            except (OSError, http.client.HTTPException) as e:
+                print(f"\r{name}: {e}, resuming", file=sys.stderr)
+                continue
+            print(f"\r{name}: {got // 1_000_000} MB", file=sys.stderr)
+            if not size or got == size:
+                break
+        else:
+            sys.exit(f"{name}: gave up after 10 tries; run the same command again to resume")
 
 
 # ---------- SQLite ----------
@@ -481,7 +490,13 @@ def juristic_digits(wid, name):
             n = int(float(wid))
         except ValueError:
             return None
-        return f"{n:012d}"[:5] + "?" * 7 if n < 10 ** 12 else None
+        if n >= 10 ** 12:
+            return None
+        # A narrow Excel column shows '1.06E+11' for 105523002118: only the digits shown are real,
+        # and the last one shown may be rounded.
+        shown = len(re.sub(r"\D", "", wid.upper().split("E")[0]).lstrip("0"))
+        k = max(0, min(5, 12 - len(str(n)) + shown - 1))
+        return f"{n:012d}"[:k] + "?" * (12 - k)
     if wid and ("x" in wid.lower() or re.fullmatch(r"[1-9]\d{12}", wid)):
         return None  # a person
     return "?" * 12 if COMPANY_WORDS.search(name) else None
@@ -565,17 +580,18 @@ def merge(parts_):
                 v[0] += n
                 v[1] += b
         for key, e in t["winners"].items():
-            E = W.get(key)
-            if E is None:
+            if key in W:
+                add(W[key], e)
+            else:
                 W[key] = e
-                continue
-            for f in ("n", "baht", "spec_n", "spec_baht", "agree_n", "agree_baht"):
-                E[f] += e[f]
-            E["y0"], E["y1"] = min(E["y0"], e["y0"]), max(E["y1"], e["y1"])
-            for f in ("ids", "names", "depts"):
-                for k, v in e[f].items():
-                    E[f][k] = E[f].get(k, 0) + v
-    # Rows without any ID join the one company of that name that has one, if there is exactly one.
+    # A prefix with an impossible entity digit came from a badly rounded ID; treat it as unknown.
+    for key in [k for k in W if not known_prefix(k.rsplit("|", 1)[1])]:
+        unknown = key.rsplit("|", 1)[0] + "|?????"
+        if unknown in W:
+            add(W[unknown], W.pop(key))
+        else:
+            W[unknown] = W.pop(key)
+    # Rows without an ID join the company of that name, if one company has at least 90% of its contracts.
     by_name = {}
     for key in W:
         nm, p = key.rsplit("|", 1)
@@ -583,15 +599,24 @@ def merge(parts_):
             by_name.setdefault(nm, []).append(key)
     for key in [k for k in W if k.endswith("|?????")]:
         target = by_name.get(key.rsplit("|", 1)[0], [])
-        if len(target) == 1:
-            E, e = W[target[0]], W.pop(key)
-            for f in ("n", "baht", "spec_n", "spec_baht", "agree_n", "agree_baht"):
-                E[f] += e[f]
-            E["y0"], E["y1"] = min(E["y0"], e["y0"]), max(E["y1"], e["y1"])
-            for f in ("ids", "names", "depts"):
-                for k, v in e[f].items():
-                    E[f][k] = E[f].get(k, 0) + v
+        if target:
+            top = max(target, key=lambda k: W[k]["n"])
+            if W[top]["n"] >= 0.9 * sum(W[k]["n"] for k in target):
+                add(W[top], W.pop(key))
     return W, Y, bad, odd
+
+
+def known_prefix(p):
+    return "?" in p or p[2:3] in ENTITY or p[:2] == "99"
+
+
+def add(E, e):
+    for f in ("n", "baht", "spec_n", "spec_baht", "agree_n", "agree_baht"):
+        E[f] += e[f]
+    E["y0"], E["y1"] = min(E["y0"], e["y0"]), max(E["y1"], e["y1"])
+    for f in ("ids", "names", "depts"):
+        for k, v in e[f].items():
+            E[f][k] = E[f].get(k, 0) + v
 
 
 def winner_rows(W):

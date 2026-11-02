@@ -59,6 +59,24 @@ Columns include total baht, contract count, count and baht of direct-procurement
 
 People (sole traders) are left out. Contracts worth more than twice their budget, almost always a typo, are not counted and are listed in `winners-summary.json` for checking.
 
+A full run on 2 Nov 2026 (fiscal 2558-2568) came to 45.3 million contracts worth 11.76 trillion baht, won by 235,647 juristic persons; the top 100 took 17.8% of the money.
+
+| Fiscal year | Contracts (m) | Value (trillion baht) | Direct (เฉพาะเจาะจง / ตกลงราคา) |
+|---|---|---|---|
+| 2558 | 3.50 | 1.03 | 11% |
+| 2559 | 1.87 | 0.68 | 17% |
+| 2560 | 2.03 | 0.71 | 16% |
+| 2561 | 3.63 | 0.91 | 31% |
+| 2562 | 3.78 | 1.10 | 30% |
+| 2563 | 4.95 | 1.24 | 33% |
+| 2564 | 5.01 | 1.30 | 32% |
+| 2565 | 4.76 | 1.16 | 32% |
+| 2566 | 5.59 | 1.18 | 38% |
+| 2567 | 5.46 | 1.17 | 38% |
+| 2568 | 4.69 | 1.28 | 31% |
+
+The direct share jumps from 2561 (fiscal 2018), partly because the 2017 Procurement Act allows direct purchases up to 500,000 baht, where the old ตกลงราคา rule stopped at 100,000. Why 2559-2560 have so few contracts I don't know yet. The companies with the most direct contracts are almost all medicine and medical-supply distributors, because hospitals routinely buy drugs this way, so the count alone says nothing about wrongdoing.
+
 ## Red flags
 
 `egp flags` looks for patterns that procurement watchdogs start from. Every one is a signal, not evidence. Many have ordinary explanations, like buying fuel from the only station in the district or medicine from the Government Pharmaceutical Organization.
@@ -81,7 +99,7 @@ Worth knowing even if you don't use this tool.
 - **Dataset names change between years:** `cgd-contract-2558`, `cdg-contract-2564` (letters swapped), `egp-contact-2568` (contact, not contract).
 - **Column counts differ:** 2558 to 2567 have 31 columns, some files with 1 to 6 extra empty ones. 2568 has 28 columns, but its headers list 26 or 31 names depending on the file. Read by position, never by header.
 - **Swapped columns:** in 2568 the procurement method and method group trade places.
-- **Registration numbers mangled by Excel:** before 2568 the 13-digit numbers became `1.05522E+11`, keeping only six digits. Individuals' numbers are masked on purpose (`352050022xxxx`). 2568 has full numbers. thai-egp keeps the five digits that survive in `winner_prefix` (registrar office, entity type, registration decade), which is enough to tell apart same-named companies from different provinces.
+- **Registration numbers mangled by Excel:** before 2568 the 13-digit numbers became `1.05522E+11`, keeping only six digits. Individuals' numbers are masked on purpose (`352050022xxxx`). 2568 has full numbers. thai-egp keeps the five digits that survive in `winner_prefix` (registrar office, entity type, registration decade), which is enough to tell apart same-named companies from different provinces. Some agencies' files for 2559-2564 kept only three digits (`1.06E+11`), the last one rounded; those rows get no `winner_prefix`, and `winners` joins them to the same-named company that holds at least 90% of that name's contracts.
 - **Contract numbers turned into dates by Excel:** `6/58` became `มิ.ย.-58`.
 - **Two date formats,** `29-ก.ค.-58` and `29 พ.ย. 67`, both with two-digit Buddhist years. thai-egp converts them to ISO dates.
 - **Big contracts first, roughly:** the first file of a year holds the large contracts and the last ones hold 1,000-baht purchases, but the order is loose. Never summarise a year from one file.
