@@ -1,6 +1,6 @@
 # thai-egp
 
-[English](README.en.md) · จากคนทำ [data-go-th](https://github.com/nuttakulsv/data-go-th) (ค้นและแก้ไฟล์ข้อมูลเปิดภาครัฐชุดอื่น) และ [awesome-thai-api](https://github.com/nuttakulsv/awesome-thai-api)
+[English](README.en.md) · ดูข้อมูลปี 2568 รายอำเภอบนเว็บ: [ภาษีบ้านฉันไปไหน](https://nuttakulsv.github.io/thai-local-spend/) · จากคนทำ [data-go-th](https://github.com/nuttakulsv/data-go-th) (ค้นและแก้ไฟล์ข้อมูลเปิดภาครัฐชุดอื่น) และ [awesome-thai-api](https://github.com/nuttakulsv/awesome-thai-api)
 
 อยากรู้ว่าเทศบาลแถวบ้านจ้างใครทำถนน ปีที่แล้วโรงพยาบาลจังหวัดซื้อยาจากใคร หรือบริษัทที่ได้งานรัฐมากที่สุดในประเทศคือใคร ทุกเรื่องนี้มีคำตอบอยู่ในข้อมูลเปิดของรัฐอยู่แล้ว กรมบัญชีกลางกับสำนักงานพัฒนารัฐบาลดิจิทัลปล่อยข้อมูลจัดซื้อจัดจ้างจากระบบ e-GP ทุกสัญญาตั้งแต่ปีงบประมาณ 2558 ไว้บน data.go.th ให้โหลดฟรี เป็นข้อมูลชุดเดียวกับที่เว็บ [ภาษีไปไหน](https://govspending.data.go.th) ใช้
 

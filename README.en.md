@@ -1,6 +1,6 @@
 # thai-egp
 
-[ภาษาไทย](README.md) · From the maker of [data-go-th](https://github.com/nuttakulsv/data-go-th) (search and clean any other data.go.th dataset) and [awesome-thai-api](https://github.com/nuttakulsv/awesome-thai-api)
+[ภาษาไทย](README.md) · Browse fiscal 2568 by district: [ภาษีบ้านฉันไปไหน](https://nuttakulsv.github.io/thai-local-spend/) · From the maker of [data-go-th](https://github.com/nuttakulsv/data-go-th) (search and clean any other data.go.th dataset) and [awesome-thai-api](https://github.com/nuttakulsv/awesome-thai-api)
 
 Thailand publishes every public procurement contract from its e-GP system, fiscal year 2558 (2015) onwards, as open data on data.go.th. It's the same data behind the government's own [ภาษีไปไหน ("where did the tax go")](https://govspending.data.go.th) site: who bought what, from whom, by which procedure, for how much.
 
