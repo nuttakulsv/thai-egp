@@ -147,6 +147,8 @@ def clean(row):
         contract_end=thai_date(g("contract_end")), contract_amount=money(g("contract_amount")),
         contract_status=text(g("contract_status")),
     )
+    if (r["district"], r["subdistrict"]) == ("ตรอน", "เพ"):
+        r["district"] = r["subdistrict"] = None  # 2568 fills blanks with this pair (ตรอน is in Uttaradit, เพ in Rayong)
     r["amount"] = r["contract_amount"] if r["contract_amount"] is not None else r["agreed_price"]
     digits = juristic_digits(g("winner_id").strip(), r["winner_name"])
     r["winner_juristic"] = int(digits is not None)
@@ -475,7 +477,9 @@ def cmd_flags(db, a):
 
 # ---------- winners across the whole country, streamed (no database needed) ----------
 
-COMPANY_WORDS = re.compile(r"บริษัท|บจก|บมจ|ห้างหุ้นส่วน|หจก|หกจ|กิจการร่วมค้า|กิจการค้าร่วม|สหกรณ์|องค์การ|จำกัด")
+COMPANY_WORDS = re.compile(r"บริษัท|บจก|บมจ|ห้างหุ้นส่วน|หจก|หกจ|กิจการร่วมค้า|กิจการค้าร่วม|สหกรณ์|องค์การ|จำกัด"
+                           r"|\bco\.|\bltd\b|\blimited\b|\bcompany\b|\bcorporation\b|\binc\b", re.I)
+PERSON_TITLE = re.compile(r"\W*(นาย|นาง|น\.ส\.|ด\.ช\.|ด\.ญ\.|ว่าที่|mr\b|mrs\b|ms\b|miss\b)", re.I)
 ENTITY = {"5": "บริษัทจำกัด", "7": "บริษัทมหาชน", "3": "ห้างหุ้นส่วนจำกัด", "2": "ห้างหุ้นส่วนสามัญนิติบุคคล"}
 
 
@@ -483,6 +487,8 @@ def juristic_digits(wid, name):
     """The 12 digits after the leading 0 of a juristic person's ID ('?' where lost), or None for people.
     Excel turned most IDs before 2568 into '1.05522E+11'; the first five digits (registrar office,
     entity type, registration decade) survive that and tell same-named companies apart."""
+    if PERSON_TITLE.match(name) and not COMPANY_WORDS.search(name):
+        return None  # a person, whatever number was typed (the Revenue Department gives foreigners 0-numbers too)
     if wid and re.fullmatch(r"0\d{12}", wid):
         return wid[1:]
     if wid and "E+" in wid.upper():

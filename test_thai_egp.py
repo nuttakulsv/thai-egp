@@ -53,6 +53,15 @@ def test_layouts():
     assert t.clean(row(t.WIDE, fiscal_year="ริมใต้")) is None  # misaligned row
 
 
+def test_placeholder_district():
+    r = t.clean(row(t.NARROW, m1=CAT, m2="เฉพาะเจาะจง", fiscal_year="2568", province="กรุงเทพมหานคร",
+                    district="ตรอน", subdistrict="เพ"))
+    assert r["province"] == "กรุงเทพมหานคร" and r["district"] is None and r["subdistrict"] is None
+    r = t.clean(row(t.NARROW, m1=CAT, m2="เฉพาะเจาะจง", fiscal_year="2568", province="อุตรดิตถ์",
+                    district="ตรอน", subdistrict="วังแดง"))
+    assert r["district"] == "ตรอน"
+
+
 def test_winner_ids():
     r = t.clean(row(t.WIDE))
     assert r["winner_id"] is None and r["winner_prefix"] == "010555" and r["winner_juristic"] == 1
@@ -60,6 +69,13 @@ def test_winner_ids():
     assert r["winner_juristic"] == 0  # 13 digits not starting with 0: a person
     r = t.clean(row(t.WIDE, winner_id="352050022xxxx", winner_name="นายทดสอบ ระบบ"))
     assert r["winner_juristic"] == 0 and r["winner_id"] == "352050022xxxx"
+    for name in ("นายฟรานซิส ทดสอบ", "นางสาวทดสอบ ระบบ", "Mr. Test Person", "MISS.TEST PERSON", "\u0e4bMRS.TEST PERSON"):
+        r = t.clean(row(t.NARROW, m1=CAT, m2="เฉพาะเจาะจง", fiscal_year="2568", winner_id="0994000012345", winner_name=name))
+        assert r["winner_juristic"] == 0, name  # a 0-number does not make a person a company
+    r = t.clean(row(t.NARROW, m1=CAT, m2="เฉพาะเจาะจง", fiscal_year="2568", winner_id="0105555012345",
+                    winner_name="บริษัท นายช่างการโยธา จำกัด"))
+    assert r["winner_juristic"] == 1
+    assert t.juristic_digits("0105555012345", "MR.TEST (THAILAND) CO., LTD.") == "105555012345"
     r = t.clean(row(t.WIDE, winner_id="1.06E+11"))  # narrow Excel column: 105555... rounded to 3 digits
     assert r["winner_juristic"] == 1 and r["winner_prefix"] is None
     r = t.clean(row(t.WIDE, winner_id="", winner_name="หจก.ทดสอบการค้า"))

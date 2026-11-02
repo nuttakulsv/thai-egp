@@ -59,7 +59,7 @@ Columns include total baht, contract count, count and baht of direct-procurement
 
 People (sole traders) are left out. Contracts worth more than twice their budget, almost always a typo, are not counted and are listed in `winners-summary.json` for checking.
 
-A full run on 2 Nov 2026 (fiscal 2558-2568) came to 45.3 million contracts worth 11.76 trillion baht, won by 235,647 juristic persons; the top 100 took 17.8% of the money.
+A full run on 2 Nov 2026 (fiscal 2558-2568) came to 45.3 million contracts worth 11.76 trillion baht, won by about 235,000 juristic persons; the top 100 took 17.8% of the money.
 
 | Fiscal year | Contracts (m) | Value (trillion baht) | Direct (เฉพาะเจาะจง / ตกลงราคา) |
 |---|---|---|---|
